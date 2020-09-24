@@ -105,7 +105,7 @@ RUN apt-get update && \
             cuda-driver-dev-10-2 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN tar -xpf qt-everywhere-src-5.15.0.tar.xz && cd qt-everywhere-src-5.15.0 && ./configure -prefix $QT_PREFIX
+RUN tar -xpf qt-everywhere-src-5.15.0.tar.xz && cd qt-everywhere-src-5.15.0 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
 
 RUN cd qt-everywhere-src-5.15.0 &&  make -j4 
 # install it
