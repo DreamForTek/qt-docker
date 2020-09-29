@@ -1,7 +1,8 @@
-# syntax=docker/dockerfile:experimental
+# syntax = docker/dockerfile:experimental
+
 ARG FROMIMAGE=ubuntu:bionic
 
-FROM ${FROMIMAGE} as build
+FROM nvcr.io/nvidia/l4t-base:r32.4.3 as build
 
 LABEL maintainer="rui.sebastiao@dreamforit.com"
 LABEL stage=build
@@ -11,7 +12,7 @@ ENV CUDA_HOME="/usr/local/cuda"
 ENV PATH="/usr/local/cuda/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 ENV LLVM_CONFIG="/usr/bin/llvm-config-9"
-
+ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/lib/aarch64-linux-gnu/:${LD_LIBRARY_PATH}"
 ARG USER_UID=
 ARG USER_GID=
 
@@ -35,9 +36,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm * -rf \
     && rm -rf /var/lib/apt/lists/*
 
-# This determines what <SOC> gets filled in in the nvidia apt sources list:
-# putting it here so there's a common layer for all boards and build_all.sh builds faster
-# valid choices: t210, t186, t194 
+# # This determines what <SOC> gets filled in in the nvidia apt sources list:
+# # putting it here so there's a common layer for all boards and build_all.sh builds faster
+# # valid choices: t210, t186, t194 
 ARG SOC="t210"
 
 RUN echo "deb https://repo.download.nvidia.com/jetson/common r32.4 main" > /etc/apt/sources.list.d/nvidia-l4t-apt-source.list \
@@ -46,10 +47,10 @@ RUN echo "deb https://repo.download.nvidia.com/jetson/common r32.4 main" > /etc/
     && rm -rf /var/lib/apt/lists/*
 
 
-# Needed in both builder and qt stages, so has to be defined here
+# # Needed in both builder and qt stages, so has to be defined here
 ENV QT_PREFIX=/opt/qt5
 
-# Install all build dependencies
+# # Install all build dependencies
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
 	ca-certificates \
 	curl \
@@ -87,58 +88,55 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 	# since 5.14.0 we apparently need libdbus-1-dev and libnss3-dev
 	libnss3-dev \
 	libdbus-1-dev \
+	libjpeg-dev \
+    libjpeg8-dev \
+    libjpeg-turbo8-dev \
+    libpng-dev \
+	libegl1-mesa-dev \
+	cuda-driver-dev-10-2 \    
 	&& apt-get -qq clean \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& printf "#!/bin/sh\nls -lah" > /usr/local/bin/ll && chmod +x /usr/local/bin/ll
+	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
-RUN wget http://master.qt.io/archive/qt/5.15/5.15.0/single/qt-everywhere-src-5.15.0.tar.xz
+RUN --mount=type=cache,target=/tmp/ rm -r qt_build && mkdir qt_build && cd qt_build && wget http://master.qt.io/archive/qt/5.14/5.14.1/single/qt-everywhere-src-5.14.1.tar.xz
 
-ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/lib/aarch64-linux-gnu/:${LD_LIBRARY_PATH}"
+RUN --mount=type=cache,target=/tmp/ ls -lh
 
-RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
-	libegl1-mesa-dev
+RUN --mount=type=cache,target=/tmp/ cd qt_build && tar -xpf qt-everywhere-src-5.14.1.tar.xz && cd qt-everywhere-src-5.14.1 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-            cuda-driver-dev-10-2 \
-    && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/tmp/  cd qt_build &&  cd qt-everywhere-src-5.14.1 &&  make -j4 
+# # install it
+# RUN cd qt-everywhere-src-5.14.1 && make install
 
-RUN tar -xpf qt-everywhere-src-5.15.0.tar.xz && cd qt-everywhere-src-5.15.0 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # resulting image with environment
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-RUN cd qt-everywhere-src-5.15.0 &&  make -j4 
-# install it
-RUN cd qt-everywhere-src-5.15.0 && make install
+# FROM built as qt
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# resulting image with environment
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ENV ENTRYPOINT_DIR=/usr/local/bin
+# ENV APP_BUILDDIR=/var/build
 
-FROM built as qt
+# COPY --from=builder ${QT_PREFIX} ${QT_PREFIX}
 
-ENV ENTRYPOINT_DIR=/usr/local/bin
-ENV APP_BUILDDIR=/var/build
+# # the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
+# # triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
+# RUN true
+# COPY --from=builder /opt/extra-dependencies /opt/extra-dependencies
 
-COPY --from=builder ${QT_PREFIX} ${QT_PREFIX}
+# #for modifications during configuration
+# ENV LD_LIBRARY_PATH=/opt/extra-dependencies/lib:${LD_LIBRARY_PATH}
 
-# the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
-# triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
-RUN true
-COPY --from=builder /opt/extra-dependencies /opt/extra-dependencies
+# # the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
+# # triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
+# RUN true
+# # COPY entrypoint.sh ${ENTRYPOINT_DIR}
 
-#for modifications during configuration
-ENV LD_LIBRARY_PATH=/opt/extra-dependencies/lib:${LD_LIBRARY_PATH}
+# # RUN chmod +x ${ENTRYPOINT_DIR}/entrypoint.sh
 
-# the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
-# triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
-RUN true
-# COPY entrypoint.sh ${ENTRYPOINT_DIR}
+# VOLUME ["${APP_BUILDDIR}"]
 
-# RUN chmod +x ${ENTRYPOINT_DIR}/entrypoint.sh
+# USER ${QT_USERNAME}
 
-VOLUME ["${APP_BUILDDIR}"]
-
-USER ${QT_USERNAME}
-
-# ENTRYPOINT ["entrypoint.sh"]
+# # ENTRYPOINT ["entrypoint.sh"]
