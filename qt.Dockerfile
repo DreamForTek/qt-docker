@@ -99,7 +99,9 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 
 WORKDIR /tmp
 
-RUN --mount=type=cache,target=/tmp/ rm -r qt_build && mkdir qt_build && cd qt_build && wget http://master.qt.io/archive/qt/5.14/5.14.1/single/qt-everywhere-src-5.14.1.tar.xz
+#https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
+
+RUN --mount=type=cache,target=/tmp/ mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
 RUN --mount=type=cache,target=/tmp/ ls -lh
 
