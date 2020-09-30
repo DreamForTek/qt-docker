@@ -101,26 +101,24 @@ WORKDIR /tmp
 
 #https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
-RUN --mount=type=cache,target=/tmp/ mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
+RUN --mount=type=cache,target=/tmp/ cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
-RUN --mount=type=cache,target=/tmp/ ls -lh
+RUN --mount=type=cache,target=/tmp/ cd qt_build && tar -xpf qt-everywhere-src-5.14.2.tar.xz && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
 
-RUN --mount=type=cache,target=/tmp/ cd qt_build && tar -xpf qt-everywhere-src-5.14.1.tar.xz && cd qt-everywhere-src-5.14.1 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
-
-RUN --mount=type=cache,target=/tmp/  cd qt_build &&  cd qt-everywhere-src-5.14.1 &&  make -j4 
+RUN --mount=type=cache,target=/tmp/  cd qt_build &&  cd qt-everywhere-src-5.14.2 &&  make -j4 
 # # install it
-# RUN cd qt-everywhere-src-5.14.1 && make install
+RUN --mount=type=cache,target=/tmp/  cd qt_build && cd qt-everywhere-src-5.14.2 && make install
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # # resulting image with environment
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# FROM built as qt
+FROM nvcr.io/nvidia/l4t-base:r32.4.3 as qt
 
 # ENV ENTRYPOINT_DIR=/usr/local/bin
 # ENV APP_BUILDDIR=/var/build
 
-# COPY --from=builder ${QT_PREFIX} ${QT_PREFIX}
+COPY --from=build ${QT_PREFIX} ${QT_PREFIX}
 
 # # the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
 # # triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
