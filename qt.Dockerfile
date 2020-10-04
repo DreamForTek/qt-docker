@@ -103,11 +103,29 @@ WORKDIR /tmp
 
 RUN --mount=type=cache,target=/tmp/ cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
-RUN --mount=type=cache,target=/tmp/ cd qt_build && tar -xpf qt-everywhere-src-5.14.2.tar.xz && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
+	libxcomposite-dev \
+	libxcomposite-dev \
+	libxcursor-dev \
+	libxtst-dev \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-5.14.2 && tar -xpf qt-everywhere-src-5.14.2.tar.xz 
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+
+
+RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
+	libxrandr-dev \
+	libxdamage-dev libfontconfig1-dev libxss-dev \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/tmp/  cd qt_build &&  cd qt-everywhere-src-5.14.2 &&  make -j4 
 # # install it
 RUN --mount=type=cache,target=/tmp/  cd qt_build && cd qt-everywhere-src-5.14.2 && make install
+
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # # resulting image with environment
@@ -126,7 +144,8 @@ COPY --from=build ${QT_PREFIX} ${QT_PREFIX}
 # COPY --from=builder /opt/extra-dependencies /opt/extra-dependencies
 
 # #for modifications during configuration
-# ENV LD_LIBRARY_PATH=/opt/extra-dependencies/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/opt/qt5/lib:${LD_LIBRARY_PATH}
+ENV PATH=/opt/qt5/bin:${PATH}
 
 # # the next copy statement failed often. My only guess is, that the extra dependencies are not existent and somehow that
 # # triggers a failure here.... A workaround for similar issues is to put an empty run statement in between: https://github.com/moby/moby/issues/37965
