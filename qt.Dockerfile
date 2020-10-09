@@ -101,6 +101,8 @@ WORKDIR /tmp
 
 #https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
+RUN --mount=type=cache,target=/tmp/ mkdir qt_build
+
 RUN --mount=type=cache,target=/tmp/ cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
