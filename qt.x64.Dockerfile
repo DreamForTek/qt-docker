@@ -112,6 +112,7 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 	libxcomposite-dev \
 	libxcursor-dev \
 	libxtst-dev \
+	libdrm-dev \
 	&& apt-get -qq clean \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -122,21 +123,29 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
-	wget 
+	wget
 
-RUN  mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
+RUN --mount=type=cache,target=/tmp/  rm -r qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
-RUN cd qt_build && rm -rf qt-everywhere-src-5.14.2 && tar -xpf qt-everywhere-src-5.14.2.tar.xz 
-RUN cd qt_build && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-5.14.2 && tar -xpf qt-everywhere-src-5.14.2.tar.xz 
+
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
-	xcb-xfixes \
-	&& apt-get -qq clean \
-	&& rm -rf /var/lib/apt/lists/*
+        libxcb-util-dev libxcb-xfixes0-dev \
+	libxi-dev libxcomposite-dev libxcursor-dev libxtst-dev \
+        && apt-get -qq clean \
+        && rm -rf /var/lib/apt/lists/*
 
-RUN cd qt_build &&  cd qt-everywhere-src-5.14.2 &&  make -j1
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+
+#RUN --mount=type=cache,target=/tmp/ ls /tmp/qt_build/qt-everywhere-src-5.14.2/
+
+#RUN bresss
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build &&  cd qt-everywhere-src-5.14.2 &&  make
 # # install it
-RUN cd qt_build && cd qt-everywhere-src-5.14.2 && make install
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.14.2 && make install
 
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
