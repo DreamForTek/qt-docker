@@ -129,6 +129,10 @@ RUN  mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/
 RUN cd qt_build && rm -rf qt-everywhere-src-5.14.2 && tar -xpf qt-everywhere-src-5.14.2.tar.xz 
 RUN cd qt_build && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
 
+RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
+	xcb-xfixes \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
 
 RUN cd qt_build &&  cd qt-everywhere-src-5.14.2 &&  make -j1
 # # install it
