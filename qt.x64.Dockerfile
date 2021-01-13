@@ -2,7 +2,7 @@
 
 ARG FROMIMAGE=ubuntu:bionic
 
-FROM nvidia/cuda:11.1-devel-ubuntu20.04 as build
+FROM nvidia/cuda:11.0-devel-ubuntu20.04 as build
 
 LABEL maintainer="rui.sebastiao@dreamforit.com"
 LABEL stage=build
@@ -152,7 +152,7 @@ RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.14.2 &
 # # resulting image with environment
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-FROM nvidia/cuda:11.1-runtime-ubuntu20.04 as qt
+FROM nvidia/cuda:11.0-runtime-ubuntu20.04 as qt
 
 # ENV ENTRYPOINT_DIR=/usr/local/bin
 # ENV APP_BUILDDIR=/var/build
