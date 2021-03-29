@@ -1,4 +1,9 @@
 # qt-docker
 
-`DOCKER_BUILDKIT=1 docker build --progress plain  --build-arg FROMIMAGE=nvcr.io/nvidia/l4t-base:r32.4.3 -t docker.pkg.github.com/dreamfortek/qt-docker/jetson-nano-qt:5.13.2 . -f qt.Dockerfile`
-`docker build --build-arg FROMIMAGE=nvcr.io/nvidia/l4t-base:r32.4.3 -t docker.pkg.github.com/dreamfortek/qt-docker/jetson-nano-qt:5.14.2 . -f qt.Dockerfile`
+## 
+
+` //sudo chcpu --disable 6-11 `
+
+` //sudo chcpu --enable 6-11 `
+
+`BUILDKIT_STEP_LOG_MAX_SIZE=10000000 DOCKER_BUILDKIT=1 docker build --platform linux/arm64 --progress plain -t docker-dtek.servebbs.org/dreamfortek/qt-docker/qt:5.15.2 . -f qt.Dockerfile`
