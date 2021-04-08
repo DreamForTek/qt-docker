@@ -83,8 +83,8 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 	libx11-xcb-dev \
 	libxcb-glx0-dev \
 	libxkbcommon-x11-dev \
-	# bash needed for argument substitution in entrypoint
 	bash \
+	# bash needed for argument substitution in entrypoint
 	# since 5.14.0 we apparently need libdbus-1-dev and libnss3-dev
 	libnss3-dev \
 	libdbus-1-dev \
@@ -110,20 +110,17 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 	libxcomposite-dev \
 	libxcursor-dev \
 	libxtst-dev \
-	&& apt-get -qq clean \
-	&& rm -rf /var/lib/apt/lists/*
-
-
-RUN --mount=type=cache,target=/tmp/ cd qt_build && ls && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
-RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
-
-
-RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
 	libxrandr-dev \
 	libxdamage-dev libfontconfig1-dev libxss-dev \
 	&& apt-get -qq clean \
 	&& rm -rf /var/lib/apt/lists/*
 	
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build && ls && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+
+
+RUN asdasdasd
 
 RUN --mount=type=cache,target=/tmp/  cd qt_build &&  cd qt-everywhere-src-5.15.2 &&  make -j4
 # # install it
