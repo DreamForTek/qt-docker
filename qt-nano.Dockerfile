@@ -51,7 +51,7 @@ RUN echo "deb https://repo.download.nvidia.com/jetson/common r32.4 main" > /etc/
 ENV QT_PREFIX=/opt/qt5
 
 # # Install all build dependencies
-RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
+RUN apt-get update && apt-get -y --no-install-recommends install \
 	ca-certificates \
 	curl \
 	python \
@@ -83,15 +83,43 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 	libx11-xcb-dev \
 	libxcb-glx0-dev \
 	libxkbcommon-x11-dev \
+	libxkbcommon-dev \
 	bash \
 	# bash needed for argument substitution in entrypoint
 	# since 5.14.0 we apparently need libdbus-1-dev and libnss3-dev
 	libnss3-dev \
 	libdbus-1-dev \
 	libjpeg-dev \
-    libjpeg8-dev \
-    libjpeg-turbo8-dev \
-    libpng-dev \
+    	libjpeg8-dev \
+    	libjpeg-turbo8-dev \
+    	libpng-dev \
+	libxcomposite-dev \
+	libxcomposite-dev \
+	libxcursor-dev \
+	libxtst-dev \
+	libxrandr-dev \
+	libfontconfig1-dev \
+	libfreetype6-dev \
+	libx11-dev \
+	libx11-xcb-dev \
+	libxext-dev \
+	libxfixes-dev \
+	libxi-dev \
+	libxrender-dev \
+	libxcb1-dev \
+	libxcb-glx0-dev \
+	libxcb-keysyms1-dev \
+	libxcb-image0-dev \
+	libxcb-shm0-dev \
+	libxcb-icccm4-dev \
+	libxcb-sync0-dev \
+	libxcb-xfixes0-dev \
+	libxcb-shape0-dev \
+	libxcb-randr0-dev \
+	libxcb-render-util0-dev \
+	libxkbcommon-dev \
+	libxkbcommon-x11-dev \
+	libxdamage-dev libfontconfig1-dev libxss-dev \
 	libegl1-mesa-dev \
 	cuda-driver-dev-10-2 \    
 	&& apt-get -qq clean \
@@ -101,31 +129,33 @@ WORKDIR /tmp
 
 #https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
 
-RUN --mount=type=cache,target=/tmp/ mkdir qt_build
+RUN --mount=type=cache,target=/tmp/ rm -r qt_build && mkdir -p qt_build
 
 RUN --mount=type=cache,target=/tmp/ cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
 
-RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
-	libxcomposite-dev \
-	libxcomposite-dev \
-	libxcursor-dev \
-	libxtst-dev \
-	libxrandr-dev \
-	libxdamage-dev libfontconfig1-dev libxss-dev \
-	&& apt-get -qq clean \
-	&& rm -rf /var/lib/apt/lists/*
-	
-
 RUN --mount=type=cache,target=/tmp/ cd qt_build && ls && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
+
 RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
 
+#17 0.805 config.cache
+#17 0.805 config.log
+#17 0.805 config.opt
+#17 0.805 config.status
+#17 0.805 config.summary
+#17 0.805 config.tests
+#17 0.805 configure
+#17 0.805 configure.bat
+#17 0.805 configure.json
 
-RUN asdasdasd
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ls && cat config.log 
 
 RUN --mount=type=cache,target=/tmp/  cd qt_build &&  cd qt-everywhere-src-5.15.2 &&  make -j4
 # # install it
 RUN --mount=type=cache,target=/tmp/  cd qt_build && cd qt-everywhere-src-5.15.2 && make install
 
+
+RUN --mount=type=cache,target=/tmp/ asd
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # # resulting image with environment
