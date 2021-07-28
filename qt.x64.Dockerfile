@@ -104,7 +104,7 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 
 WORKDIR /tmp
 
-#https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
+#https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
 
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
@@ -125,9 +125,9 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
 	wget
 
-RUN --mount=type=cache,target=/tmp/  rm -r qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.14.2/single/qt-everywhere-src-5.14.2.tar.xz
+RUN --mount=type=cache,target=/tmp/  rm -r qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
 
-RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-5.14.2 && tar -xpf qt-everywhere-src-5.14.2.tar.xz 
+RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
 
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
@@ -137,15 +137,15 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
         && rm -rf /var/lib/apt/lists/*
 
 
-RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.14.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
 
-#RUN --mount=type=cache,target=/tmp/ ls /tmp/qt_build/qt-everywhere-src-5.14.2/
+#RUN --mount=type=cache,target=/tmp/ ls /tmp/qt_build/qt-everywhere-src-5.15.2/
 
 #RUN bresss
 
-RUN --mount=type=cache,target=/tmp/ cd qt_build &&  cd qt-everywhere-src-5.14.2 &&  make
+RUN --mount=type=cache,target=/tmp/ cd qt_build &&  cd qt-everywhere-src-5.15.2 &&  make
 # # install it
-RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.14.2 && make install
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && make install
 
 
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
