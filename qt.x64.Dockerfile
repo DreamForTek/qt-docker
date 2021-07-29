@@ -125,16 +125,18 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recomme
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
 	wget
 
-RUN --mount=type=cache,target=/tmp/  rm -r qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
+RUN --mount=type=cache,target=/tmp/ ls && rm -r qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
 
 RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
 
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y --no-install-recommends install \
         libxcb-util-dev libxcb-xfixes0-dev \
+	libxcb-xinerama0-dev \
+	libxcb-xinput-dev \
 	libxi-dev libxcomposite-dev libxcursor-dev libxtst-dev \
-        && apt-get -qq clean \
-        && rm -rf /var/lib/apt/lists/*
+    && apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
 
 
 RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
