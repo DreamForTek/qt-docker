@@ -54,7 +54,7 @@ WORKDIR /tmp
 
 
 # # Needed in both builder and qt stages, so has to be defined here
-ENV QT_PREFIX=/opt/qt5
+ENV QT_PREFIX=/opt/qt6
 
 # # Install all build dependencies
 RUN apt-get update && apt-get -y --no-install-recommends install \
@@ -199,29 +199,80 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
 
 WORKDIR /tmp
 
-#https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
+#https://mirrors.dotsrc.org/qtproject/archive/qt/5.14/5.15.2/single/qt-everywhere-src-6.2.0.tar.xz
 
-
-
-RUN --mount=type=cache,target=/tmp/ rm -rf qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz
-
-RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
-
-RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests
-
-#RUN --mount=type=cache,target=/tmp/ ls /tmp/qt_build/qt-everywhere-src-5.15.2/
-
-#RUN bresss
 
 # # Install all build dependencies
 RUN apt-get update && apt-get -y --no-install-recommends install \
 	libxcb-dri3-dev \
+	# cmake \
 	&& apt-get -qq clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=cache,target=/tmp/ cd qt_build &&  cd qt-everywhere-src-5.15.2 &&  make -j4
+
+RUN --mount=type=cache,target=/tmp/ rm -rf qt_build && mkdir qt_build && cd qt_build && wget https://mirrors.dotsrc.org/qtproject/archive/qt/6.2/6.2.0/single/qt-everywhere-src-6.2.0.tar.xz
+
+
+# # Install all build dependencies
+RUN apt-get update && apt-get -y --no-install-recommends install \
+	unzip \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip && unzip ninja-linux.zip -d /usr/local/bin/ && update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force 
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build && rm -rf qt-everywhere-src-6.2.0 && tar -xpf qt-everywhere-src-6.2.0.tar.xz
+
+
+
+# # Install all build dependencies
+RUN apt-get update && apt-get -y --no-install-recommends install \
+	dbus \
+	fontconfig libdrm-dev \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+
+#RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.0/cmake-3.22.0-linux-x86_64.sh && chmod +x ./cmake-3.22.0-linux-x86_64.sh && ./cmake-3.22.0-linux-x86_64.sh
+
+RUN wget -qO- "https://cmake.org/files/v3.22/cmake-3.22.0-linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C /usr/local 
+
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - 
+RUN apt-get install -y nodejs
+
+
+# # Install all build dependencies
+RUN apt-get update && apt-get -y --no-install-recommends install \
+	xscreensaver \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+# # Install all build dependencies
+RUN apt-get update && apt-get -y --no-install-recommends install \
+	libxshmfence-dev \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+# RUN apt-get update && apt-get -y --no-install-recommends install \
+# 	ninja-build \
+# 	&& apt-get -qq clean \
+# 	&& rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-6.2.0 && ./configure -prefix $QT_PREFIX -nomake examples -nomake tests -skip qtwayland -skip qtvirtualkeyboard -skip qtquick3d -skip qtcharts -skip qtdatavis3d
+
+#RUN --mount=type=cache,target=/tmp/ ls /tmp/qt_build/qt-everywhere-src-6.2.0/
+
+#RUN bresss
+
+
+RUN apt-get update && apt-get -y --no-install-recommends install \
+	libxkbfile-dev \
+	&& apt-get -qq clean \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=cache,target=/tmp/ cd qt_build &&  cd qt-everywhere-src-6.2.0 && cmake --build . --parallel
 # # install it
-RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && make install
+RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-6.2.0 && cmake --install .
 
 
 RUN --mount=type=cache,target=/tmp/ ls /opt/qt5/plugins/platforms/

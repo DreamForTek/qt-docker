@@ -122,7 +122,9 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
 	libxdamage-dev libfontconfig1-dev libxss-dev \
 	libegl1-mesa-dev \
 	libxcb-util-dev \
-	cuda-driver-dev-10-2 \    
+	cuda-driver-dev-10-2 \
+	libxcb-xinerama0-dev \
+	libxcb-xinput-dev \    
 	&& apt-get -qq clean \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -136,12 +138,6 @@ RUN --mount=type=cache,target=/tmp/ cd qt_build && wget https://mirrors.dotsrc.o
 
 RUN --mount=type=cache,target=/tmp/ cd qt_build && ls && rm -rf qt-everywhere-src-5.15.2 && tar -xpf qt-everywhere-src-5.15.2.tar.xz 
 
-
-# # Install all build dependencies
-RUN apt-get update && apt-get -y --no-install-recommends install \
-	libxcb-xinerama0-dev \
-	libxcb-xinput-dev \
-	&& rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt-everywhere-src-5.15.2 && ./configure -prefix $QT_PREFIX -xcb -xcb-xlib -nomake examples -nomake tests 
 
