@@ -285,8 +285,6 @@ RUN --mount=type=cache,target=/tmp/ cd qt_build && cd qt5 && make install
 
 RUN --mount=type=cache,target=/tmp/ ls /opt/qt5/lib/
 
-RUN asdasd
-
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # # resulting image with environment
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
